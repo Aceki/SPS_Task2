@@ -113,6 +113,9 @@ void Minesweeper::Game::switchCellMarker(int i, int j)
 
 void Minesweeper::Game::uncoverCellsAround(int i, int j)
 {
+    if (i < 0 || i >= m_n || j < 0 || j >= m_m)
+        throw OutOfBounds();
+
     if (m_isGameStart)
     {
         int cellsWithFlag = 0;
