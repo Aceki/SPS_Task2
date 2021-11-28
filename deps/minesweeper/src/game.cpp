@@ -84,54 +84,60 @@ void Minesweeper::Game::switchCellMarker(int i, int j)
     if (i < 0 || i >= m_n || j < 0 || j >= m_m)
         throw OutOfBounds();
 
-    Cell& cell = m_field[coordToIndex(i, j)];
-
-    if (cell.isCovered())
+    if (m_isGameStart)
     {
-        if (cell.marker() == Cell::Flag)
+        Cell& cell = m_field[coordToIndex(i, j)];
+
+        if (cell.isCovered())
         {
-            m_flagsCount++;
+            if (cell.marker() == Cell::Flag)
+            {
+                m_flagsCount++;
 
-            emit flagsCountChanged(m_flagsCount);
+                emit flagsCountChanged(m_flagsCount);
+            }
+
+            cell.switchMarker();
+
+            if (cell.marker() == Cell::Flag)
+            {
+                m_flagsCount--;
+
+                emit flagsCountChanged(m_flagsCount);
+            }
+
+            emit cellMarkerSwitched(i, j, cell.marker());
         }
-
-        cell.switchMarker();
-
-        if (cell.marker() == Cell::Flag)
-        {
-            m_flagsCount--;
-
-            emit flagsCountChanged(m_flagsCount);
-        }
-
-        emit cellMarkerSwitched(i, j, cell.marker());
     }
 }
 
 void Minesweeper::Game::uncoverCellsAround(int i, int j)
 {
-    int cellsWithFlag = 0;
-
-    Cell& cell = m_field[coordToIndex(i, j)];
-
-    if (!cell.isCovered())
+    if (m_isGameStart)
     {
-        std::vector<std::pair<int, int>> neighbours = getNeighboursCoords(i, j);
-        std::vector<std::pair<int, int>> neighboursToUncover;
-        for (std::pair<int, int>& neighbour : neighbours)
-        {
-            Cell& neighbouringCell = m_field[coordToIndex(neighbour.first, neighbour.second)];
-            
-            if (neighbouringCell.marker() == Cell::Flag)
-                cellsWithFlag++;
-            else
-                neighboursToUncover.push_back(neighbour);
-        }
+        int cellsWithFlag = 0;
 
-        if (cellsWithFlag == cell.value())
+        Cell& cell = m_field[coordToIndex(i, j)];
+
+        if (!cell.isCovered())
         {
-            for (std::pair<int, int>& neighbour : neighboursToUncover)
-                uncoverCell(neighbour.first, neighbour.second);
+            std::vector<std::pair<int, int>> neighbours = getNeighboursCoords(i, j);
+            std::vector<std::pair<int, int>> neighboursToUncover;
+            for (std::pair<int, int>& neighbour : neighbours)
+            {
+                Cell& neighbouringCell = m_field[coordToIndex(neighbour.first, neighbour.second)];
+                
+                if (neighbouringCell.marker() == Cell::Flag)
+                    cellsWithFlag++;
+                else
+                    neighboursToUncover.push_back(neighbour);
+            }
+
+            if (cellsWithFlag == cell.value())
+            {
+                for (std::pair<int, int>& neighbour : neighboursToUncover)
+                    uncoverCell(neighbour.first, neighbour.second);
+            }
         }
     }
 }
