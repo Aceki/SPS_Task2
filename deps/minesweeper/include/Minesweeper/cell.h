@@ -13,7 +13,6 @@ namespace Minesweeper
         };
 
         Cell(int i, int j, int value, bool mined);
-
         int i() const;
         int j() const;
         int value() const;
