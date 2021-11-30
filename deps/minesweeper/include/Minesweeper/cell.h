@@ -19,7 +19,7 @@ namespace Minesweeper
         Marker marker() const;
         bool isMined() const;
         bool isCovered() const;
-        void switchMarker();
+        void setMarker(Marker marker);
         void uncover();
 
     private:

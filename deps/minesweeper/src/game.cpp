@@ -90,21 +90,29 @@ void Minesweeper::Game::switchCellMarker(int i, int j)
 
         if (cell.isCovered())
         {
-            if (cell.marker() == Cell::Flag)
+            if (cell.marker() == Cell::None)
             {
+                if (m_flagsCount > 0)
+                {
+                    cell.setMarker(Cell::Flag);
+
+                    m_flagsCount--;
+
+                    emit flagsCountChanged(m_flagsCount);
+                }
+                else
+                    cell.setMarker(Cell::Question);
+            }
+            else if (cell.marker() == Cell::Flag)
+            {
+                cell.setMarker(Cell::Question);
+
                 m_flagsCount++;
 
                 emit flagsCountChanged(m_flagsCount);
             }
-
-            cell.switchMarker();
-
-            if (cell.marker() == Cell::Flag)
-            {
-                m_flagsCount--;
-
-                emit flagsCountChanged(m_flagsCount);
-            }
+            else
+                cell.setMarker(Cell::None);
 
             emit cellMarkerSwitched(i, j, cell.marker());
         }
