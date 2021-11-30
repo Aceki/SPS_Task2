@@ -19,7 +19,7 @@ GameWindow::GameWindow(QWidget* parent, GameSettings settings)
     QWidget* centralWidget = new QWidget(this);
     setCentralWidget(centralWidget);
 
-    Field* field = new Field(m_settings.n, m_settings.m, this);
+    m_field = new Field(m_settings.n, m_settings.m, this);
 
     QVBoxLayout* generalLayout = new QVBoxLayout(this);
 
@@ -28,47 +28,41 @@ GameWindow::GameWindow(QWidget* parent, GameSettings settings)
     QLabel* flagsLabel = new QLabel(this);
     flagsLabel->setText("Flags: 0");
     labelsLayout->addWidget(flagsLabel);
-    connect(field, &Field::flagsCountChanged, flagsLabel, [flagsLabel](int newValue) { 
+    connect(m_field, &Field::flagsCountChanged, flagsLabel, [flagsLabel](int newValue) { 
         flagsLabel->setText(QStringLiteral("Flags: ") + QString::number(newValue));
     });
 
     QLabel* timeLabel = new QLabel(this);
     timeLabel->setText("Time: 0");
     timeLabel->setAlignment(Qt::AlignRight);
-    connect(field, &Field::timeChanged, timeLabel, [timeLabel](int newValue) {
+    connect(m_field, &Field::timeChanged, timeLabel, [timeLabel](int newValue) {
         timeLabel->setText(QStringLiteral("Time: ") + QString::number(newValue));
     });
     labelsLayout->addWidget(timeLabel);
 
     generalLayout->addLayout(labelsLayout);
 
-    generalLayout->addWidget(field);
+    generalLayout->addWidget(m_field);
 
     QPushButton* resetButton = new QPushButton("Reset", this);
 
-    connect(resetButton, &QPushButton::clicked, field, &Field::reset);
+    connect(resetButton, &QPushButton::clicked, m_field, &Field::reset);
 
     generalLayout->QLayout::addWidget(resetButton);
 
-    connect(field, &Field::loose, [this, field] {  
-        QMessageBox* looseMessageBox = new QMessageBox(this);
-        looseMessageBox->setText("Вы проиграли =(");
-        looseMessageBox->setWindowTitle("Message");
-
-        looseMessageBox->show();
-
-        connect(looseMessageBox, &QMessageBox::buttonClicked, field, &Field::reset);
-    });
-
-    connect(field, &Field::win, [this, field] {  
-        QMessageBox* winMessageBox = new QMessageBox(this);
-        winMessageBox->setText("Вы выиграли =)");
-        winMessageBox->setWindowTitle("Message");
-
-        winMessageBox->show();
-
-        connect(winMessageBox, &QMessageBox::buttonClicked, field, &Field::reset);
-    });
+    connect(m_field, &Field::loose, [this]() { showMessage(QStringLiteral("Вы проиграли =(")); });
+    connect(m_field, &Field::win, [this]() { showMessage(QStringLiteral("Вы выиграли =)")); });
 
     centralWidget->setLayout(generalLayout);
+}
+
+void GameWindow::showMessage(QString message)
+{
+    QMessageBox* winMessageBox = new QMessageBox(this);
+    winMessageBox->setText(message);
+    winMessageBox->setWindowTitle(QStringLiteral("Message"));
+
+    winMessageBox->show();
+
+    connect(winMessageBox, &QMessageBox::buttonClicked, m_field, &Field::reset);
 }
